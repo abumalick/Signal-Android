@@ -29,11 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -54,6 +57,7 @@ import org.signal.core.ui.compose.Previews
 import org.thoughtcrime.securesms.R
 import org.thoughtcrime.securesms.components.webrtc.WebRtcLocalRenderState
 import org.thoughtcrime.securesms.events.CallParticipant
+import org.thoughtcrime.securesms.keyvalue.SignalStore
 import org.signal.core.ui.R as CoreUiR
 
 /** Default inset of the pip from the safe area. The overflow strip's inset replaces it when on screen. */
@@ -115,7 +119,7 @@ fun MoveableLocalVideoRenderer(
 
     val targetSize = if (isFocused) focusedSize else lastVisibleSize.rotateForVideoOrientation(isVideoLandscape)
 
-    val state = remember { PictureInPictureState(initialContentSize = targetSize) }
+    val state = rememberLocalVideoState(targetSize)
     state.animateTo(targetSize)
 
     val selfPipMode = when (localRenderState) {
@@ -198,6 +202,29 @@ fun MoveableLocalVideoRenderer(
       }
     }
   }
+}
+
+@Composable
+internal fun rememberLocalVideoState(initialContentSize: DpSize): PictureInPictureState {
+  if (LocalInspectionMode.current) {
+    return remember { PictureInPictureState(initialContentSize = initialContentSize) }
+  }
+
+  val state = remember {
+    PictureInPictureState(
+      initialContentSize = initialContentSize,
+      initialCorner = PictureInPictureState.Corner.entries.firstOrNull { it.name == SignalStore.misc.localVideoCorner }
+        ?: PictureInPictureState.Corner.BOTTOM_RIGHT
+    )
+  }
+
+  LaunchedEffect(state) {
+    snapshotFlow { state.corner }.collect { corner ->
+      SignalStore.misc.localVideoCorner = corner.name
+    }
+  }
+
+  return state
 }
 
 @Composable

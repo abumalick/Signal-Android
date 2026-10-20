@@ -1,5 +1,8 @@
 # Signal Android
 
+This is an unofficial fork that remembers the self-view corner between video calls.
+See [fork and distribution notes](FORK.md) for the change, build instructions, and APK publishing requirements.
+
 Signal is a simple, powerful, and secure messenger that uses your phone's data connection (WiFi/4G/5G) to communicate securely.
 
 Millions of people use Signal every day for free and instantaneous communication anywhere in the world. Send and receive high-fidelity messages, participate in HD voice/video calls, and explore a growing set of new features that help you stay connected. 
