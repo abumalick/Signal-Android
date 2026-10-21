@@ -40,30 +40,34 @@ layout rather than a camera feed; it does not establish a live call.
 
 ## Publishing APKs to a custom F-Droid repository
 
-This repository supplies the source. It does not yet configure a release signing
-key, a distinct distribution application ID, or an APK publishing workflow.
-Publishing the source alone does not make an installable F-Droid release.
+This repository supplies the source. It does not configure a release signing
+key or an APK publishing workflow: the release key and the repository index live
+outside this repository. Publishing the source alone does not make an
+installable F-Droid release.
 
-Before the first distributed release:
+The `github` distribution flavor sets the permanent application ID
+`net.hilson.signal`. Other flavors keep upstream's `org.thoughtcrime.securesms`
+ID. A differently signed APK cannot update an official Signal installation, and
+the distinct ID keeps the fork a separate app: it is registered on its own, and
+moving data from the official app (for example with a local backup) is a
+separate step. Do not change this ID after the first distributed release.
 
-1. Choose a permanent application ID for the fork. Normal builds currently retain
-   upstream's `org.thoughtcrime.securesms` ID. A differently signed APK cannot
-   update an official Signal installation. A distinct ID permits installation
-   alongside it; registration and data migration are separate steps.
-2. Use a permanent release signing key and keep its credentials outside Git.
-   Later APK updates must retain the application ID and compatible signing
-   identity, with increasing Android version codes.
-3. Use the `githubProdRelease` variant for repository distribution. It disables
+Before each distributed release:
+
+1. Use the permanent release signing key and keep its credentials outside Git.
+   APK updates must retain the application ID and signing identity, with
+   increasing Android version codes.
+2. Use the `githubProdRelease` variant for repository distribution. It disables
    Signal's website APK updater. Build with
    `mise exec -- ./gradlew :Signal-Android:assembleGithubProdRelease`, then sign
    and verify the release APK through the release pipeline. This variant still
    requires release validation; the debug instrumentation build is not a release
    qualification.
-4. Publish signed APKs as versioned release assets with their source commit/tag
+3. Publish signed APKs as versioned release assets with their source commit/tag
    and SHA-256 checksums. The F-Droid repository can ingest these APKs, generate
    its signed index, and serve them over HTTPS. Its index signing key is separate
    from the app signing key.
-5. Verify a fresh install, a real video call, corner persistence after restarting
+4. Verify a fresh install, a real video call, corner persistence after restarting
    the app, and an in-place update from the preceding fork release before
    distributing an update.
 

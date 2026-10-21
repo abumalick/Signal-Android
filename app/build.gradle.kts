@@ -455,6 +455,7 @@ android {
 
     create("github") {
       dimension = "distribution"
+      applicationId = "net.hilson.signal"
       buildConfigField("boolean", "MANAGES_APP_UPDATES", "false")
       buildConfigField("String", "APK_UPDATE_MANIFEST_URL", "null")
       buildConfigField("String", "BUILD_DISTRIBUTION_TYPE", "\"github\"")
